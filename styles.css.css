@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f7f6;
+  color: #333;
+  padding: 20px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Червона рамка та підсвічування, якщо є завдання на завтра */
+body.alert-mode {
+  background-color: #fff5f5;
+  border: 8px solid #e53e3e;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+/* Баннер сповіщення */
+.banner {
+  background-color: #e53e3e;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  animation: pulse 2s infinite;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.day-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.day-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 5px;
+  color: #2b6cb0;
+}
+
+.day-card.tomorrow-highlight {
+  border: 2px solid #e53e3e;
+}
+
+.lesson-item {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.lesson-item input, 
+.lesson-item textarea {
+  width: 100%;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  padding: 6px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.lesson-item textarea {
+  resize: vertical;
+  height: 50px;
+}
+
+.delete-btn {
+  background: #feb2b2;
+  color: #9b2c2c;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.delete-btn:hover {
+  background: #fc8181;
+}
+
+.add-btn {
+  background: #4299e1;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: auto;
+  font-weight: bold;
+}
+
+.add-btn:hover {
+  background: #3182ce;
+}

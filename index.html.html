@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Електронний Щоденник</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Мій Електронний Щоденник</h1>
+      <div id="notification-banner" class="banner hidden">
+        <span id="notification-text"></span>
+      </div>
+    </header>
+
+    <main class="week-grid">
+      <div class="day-card" data-day="Mon">
+        <h2>Понеділок</h2>
+        <div class="schedule"></div>
+        <button class="add-btn" onclick="addLesson('Mon')">+ Додати урок</button>
+      </div>
+
+      <div class="day-card" data-day="Tue">
+        <h2>Вівторок</h2>
+        <div class="schedule"></div>
+        <button class="add-btn" onclick="addLesson('Tue')">+ Додати урок</button>
+      </div>
+
+      <div class="day-card" data-day="Wed">
+        <h2>Середа</h2>
+        <div class="schedule"></div>
+        <button class="add-btn" onclick="addLesson('Wed')">+ Додати урок</button>
+      </div>
+
+      <div class="day-card" data-day="Thu">
+        <h2>Четвер</h2>
+        <div class="schedule"></div>
+        <button class="add-btn" onclick="addLesson('Thu')">+ Додати урок</button>
+      </div>
+
+      <div class="day-card" data-day="Fri">
+        <h2>П'ятниця</h2>
+        <div class="schedule"></div>
+        <button class="add-btn" onclick="addLesson('Fri')">+ Додати урок</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
