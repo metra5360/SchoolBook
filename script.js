@@ -1,96 +1,173 @@
-const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let currentDate = new Date();
+let selectedDateStr = null;
+let tasksData = JSON.parse(localStorage.getItem('calendar_tasks_v3')) || {};
+
+const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadDiary();
+  renderCalendar();
   checkTomorrowTasks();
 });
 
-function addLesson(day, name = '', task = '') {
-  const container = document.querySelector(`.day-card[data-day="${day}"] .schedule`);
+function renderCalendar() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  document.getElementById('month-year-title').textContent = `${months[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
   
-  const lessonDiv = document.createElement('div');
-  lessonDiv.className = 'lesson-item';
-  
-  lessonDiv.innerHTML = `
-    <input type="text" placeholder="Назва уроку..." value="${name}" oninput="saveDiary()">
-    <textarea placeholder="Домашнє завдання..." oninput="saveDiary()">${task}</textarea>
-    <button class="delete-btn" onclick="removeLesson(this)">Видалити</button>
-  `;
-  
-  container.appendChild(lessonDiv);
-  saveDiary();
+  // Пн = 0, Нд = 6
+  let startingDay = firstDay.getDay() - 1;
+  if (startingDay === -1) startingDay = 6;
+
+  const totalDays = lastDay.getDate();
+  const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+  const daysContainer = document.getElementById('calendar-days');
+  daysContainer.innerHTML = '';
+
+  // Дні попереднього місяця
+  for (let i = startingDay - 1; i >= 0; i--) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-cell other-month';
+    dayDiv.textContent = prevMonthLastDay - i;
+    daysContainer.appendChild(dayDiv);
+  }
+
+  // Дні поточного місяця
+  const tomorrowStr = getTomorrowDateString();
+
+  for (let day = 1; day <= totalDays; day++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-cell';
+    dayDiv.textContent = day;
+
+    const dateKey = formatDateKey(year, month, day);
+
+    if (tasksData[dateKey] && tasksData[dateKey].length > 0) {
+      dayDiv.classList.add('has-tasks');
+    }
+
+    if (dateKey === tomorrowStr) {
+      dayDiv.classList.add('is-tomorrow');
+    }
+
+    if (dateKey === selectedDateStr) {
+      dayDiv.classList.add('selected');
+    }
+
+    dayDiv.onclick = () => selectDate(dateKey, dayDiv);
+    daysContainer.appendChild(dayDiv);
+  }
 }
 
-function removeLesson(button) {
-  button.parentElement.remove();
-  saveDiary();
+function selectDate(dateKey, element) {
+  document.querySelectorAll('.day-cell').forEach(el => el.classList.remove('selected'));
+  element.classList.add('selected');
+
+  selectedDateStr = dateKey;
+  
+  const [y, m, d] = dateKey.split('-');
+  document.getElementById('selected-date-title').textContent = `${parseInt(d)} ${months[parseInt(m)]}`;
+  
+  const tomorrowBadge = document.getElementById('tomorrow-badge');
+  if (dateKey === getTomorrowDateString()) {
+    tomorrowBadge.classList.remove('hidden');
+  } else {
+    tomorrowBadge.classList.add('hidden');
+  }
+
+  document.getElementById('add-task-btn').classList.remove('hidden');
+  renderTasks();
 }
 
-function saveDiary() {
-  const diaryData = {};
-  
-  document.querySelectorAll('.day-card').forEach(dayCard => {
-    const day = dayCard.dataset.day;
-    diaryData[day] = [];
-    
-    dayCard.querySelectorAll('.lesson-item').forEach(item => {
-      const name = item.querySelector('input').value;
-      const task = item.querySelector('textarea').value;
-      
-      diaryData[day].push({ name, task });
-    });
+function renderTasks() {
+  const tasksList = document.getElementById('tasks-list');
+  tasksList.innerHTML = '';
+
+  const dayTasks = tasksData[selectedDateStr] || [];
+
+  if (dayTasks.length === 0) {
+    tasksList.innerHTML = '<p class="empty-state">На цей день немає завдань.</p>';
+    return;
+  }
+
+  dayTasks.forEach((task, index) => {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task-item';
+    taskDiv.innerHTML = `
+      <input type="text" placeholder="Предмет..." value="${task.subject}" oninput="updateTask(${index}, 'subject', this.value)">
+      <textarea placeholder="Домашнє завдання..." oninput="updateTask(${index}, 'text', this.value)">${task.text}</textarea>
+      <button class="delete-btn" onclick="removeTask(${index})">Видалити</button>
+    `;
+    tasksList.appendChild(taskDiv);
   });
-  
-  localStorage.setItem('myDiaryData_v2', JSON.stringify(diaryData));
+}
+
+function addNewTaskInput() {
+  if (!selectedDateStr) return;
+  if (!tasksData[selectedDateStr]) tasksData[selectedDateStr] = [];
+
+  tasksData[selectedDateStr].push({ subject: '', text: '' });
+  saveAndRefresh();
+}
+
+function updateTask(index, field, value) {
+  if (tasksData[selectedDateStr] && tasksData[selectedDateStr][index]) {
+    tasksData[selectedDateStr][index][field] = value;
+    saveAndRefresh();
+  }
+}
+
+function removeTask(index) {
+  tasksData[selectedDateStr].splice(index, 1);
+  if (tasksData[selectedDateStr].length === 0) {
+    delete tasksData[selectedDateStr];
+  }
+  saveAndRefresh();
+}
+
+function saveAndRefresh() {
+  localStorage.setItem('calendar_tasks_v3', JSON.stringify(tasksData));
+  renderTasks();
+  renderCalendar();
   checkTomorrowTasks();
 }
 
-function loadDiary() {
-  const saved = localStorage.getItem('myDiaryData_v2');
-  if (!saved) return;
-  
-  const diaryData = JSON.parse(saved);
-  
-  for (const day in diaryData) {
-    diaryData[day].forEach(lesson => {
-      addLesson(day, lesson.name, lesson.task);
-    });
-  }
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  renderCalendar();
 }
 
 function checkTomorrowTasks() {
-  const todayIndex = new Date().getDay();
-  const tomorrowIndex = (todayIndex + 1) % 7;
-  const tomorrowKey = daysMap[tomorrowIndex];
-  
-  const saved = localStorage.getItem('myDiaryData_v2');
-  if (!saved) return;
-  
-  const diaryData = JSON.parse(saved);
-  const tomorrowLessons = diaryData[tomorrowKey] || [];
-  
-  const tasksToDisplay = tomorrowLessons.filter(l => l.task.trim() !== '');
-  
+  const tomorrowStr = getTomorrowDateString();
+  const tomorrowTasks = tasksData[tomorrowStr] || [];
+
+  const tasksWithContent = tomorrowTasks.filter(t => t.text.trim() !== '' || t.subject.trim() !== '');
+
   const banner = document.getElementById('notification-banner');
   const bannerText = document.getElementById('notification-text');
-  
-  if (tasksToDisplay.length > 0) {
+
+  if (tasksWithContent.length > 0) {
     document.body.classList.add('alert-mode');
     
-    const lessonList = tasksToDisplay.map(l => l.name ? `"${l.name}"` : 'Урок').join(', ');
-    bannerText.textContent = `Завдання на завтра з предметів: ${lessonList}`;
+    const subjectsList = tasksWithContent.map(t => t.subject ? `"${t.subject}"` : 'Предмет').join(', ');
+    bannerText.innerHTML = `<strong>На завтра є домашнє завдання!</strong> Предмети: ${subjectsList}`;
     banner.classList.remove('hidden');
-    
-    document.querySelectorAll('.day-card').forEach(card => {
-      if (card.dataset.day === tomorrowKey) {
-        card.classList.add('tomorrow-highlight');
-      } else {
-        card.classList.remove('tomorrow-highlight');
-      }
-    });
   } else {
     document.body.classList.remove('alert-mode');
     banner.classList.add('hidden');
-    document.querySelectorAll('.day-card').forEach(card => card.classList.remove('tomorrow-highlight'));
   }
+}
+
+function getTomorrowDateString() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return formatDateKey(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+}
+
+function formatDateKey(year, month, day) {
+  return `${year}-${month}-${day}`;
 }
