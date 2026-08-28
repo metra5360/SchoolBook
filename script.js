@@ -43,7 +43,7 @@ function renderCalendar() {
 
     const dateKey = formatDateKey(year, month, day);
 
-    if (tasksData[dateKey] && tasksData[dateKey].length > 0) {
+    if (tasksData[dateKey] && tasksData[dateKey].some(t => t.subject.trim() || t.text.trim())) {
       dayDiv.classList.add('has-tasks');
     }
 
@@ -94,11 +94,29 @@ function renderTasks() {
   dayTasks.forEach((task, index) => {
     const taskDiv = document.createElement('div');
     taskDiv.className = 'task-item';
-    taskDiv.innerHTML = `
-      <input type="text" placeholder="Предмет..." value="${task.subject}" oninput="updateTask(${index}, 'subject', this.value)">
-      <textarea placeholder="Домашнє завдання..." oninput="updateTask(${index}, 'text', this.value)">${task.text}</textarea>
-      <button class="delete-btn" onclick="removeTask(${index})">Видалити</button>
-    `;
+    
+    const inputSubject = document.createElement('input');
+    inputSubject.type = 'text';
+    inputSubject.placeholder = 'Предмет...';
+    inputSubject.value = task.subject;
+    inputSubject.oninput = (e) => updateTask(index, 'subject', e.target.value);
+    inputSubject.onchange = () => { renderCalendar(); checkTomorrowTasks(); };
+
+    const textareaTask = document.createElement('textarea');
+    textareaTask.placeholder = 'Домашнє завдання...';
+    textareaTask.value = task.text;
+    textareaTask.oninput = (e) => updateTask(index, 'text', e.target.value);
+    textareaTask.onchange = () => { renderCalendar(); checkTomorrowTasks(); };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Видалити';
+    deleteBtn.onclick = () => removeTask(index);
+
+    taskDiv.appendChild(inputSubject);
+    taskDiv.appendChild(textareaTask);
+    taskDiv.appendChild(deleteBtn);
+    
     tasksList.appendChild(taskDiv);
   });
 }
@@ -116,7 +134,6 @@ function addNewTaskInput() {
 function updateTask(index, field, value) {
   if (tasksData[selectedDateStr] && tasksData[selectedDateStr][index]) {
     tasksData[selectedDateStr][index][field] = value;
-    // Зберігаємо дані в пам'ять без виклику renderTasks(), щоб поле вводу не закривалось
     saveData();
   }
 }
@@ -129,11 +146,11 @@ function removeTask(index) {
   saveData();
   renderTasks();
   renderCalendar();
+  checkTomorrowTasks();
 }
 
 function saveData() {
   localStorage.setItem('calendar_tasks_v3', JSON.stringify(tasksData));
-  checkTomorrowTasks();
 }
 
 function changeMonth(delta) {
