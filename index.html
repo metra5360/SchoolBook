@@ -3,86 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Сучасний Е-Щоденник</title>
+  <title>Календар Щоденник</title>
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app-container">
     <header class="header">
-      <div class="header-content">
-        <h1>📅 Календар-Щоденник</h1>
-        <p class="subtitle">Плануй свій тиждень зручно та стильно</p>
+      <div class="header-info">
+        <h1>📅 Календар Завдань</h1>
+        <p>Плануй навчання зручно та стильно</p>
       </div>
+
       <div id="notification-banner" class="banner hidden">
-        <span class="icon">⚠️</span>
-        <span id="notification-text"></span>
+        <span class="bell-icon">🔔</span>
+        <div id="notification-text"></div>
       </div>
     </header>
 
-    <main class="calendar-grid">
-      <div class="day-card" data-day="Mon">
-        <div class="day-header">
-          <span class="day-name">Понеділок</span>
-          <span class="day-badge">ПН</span>
+    <main class="main-content">
+      <!-- Блок Календаря -->
+      <section class="calendar-card">
+        <div class="calendar-header">
+          <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+          <h2 id="month-year-title">Місяць Рік</h2>
+          <button class="nav-btn" onclick="changeMonth(1)">›</button>
         </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Mon')"><span>+</span> Додати урок</button>
-      </div>
+        
+        <div class="weekdays-grid">
+          <div>Пн</div><div>Вет</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Нд</div>
+        </div>
 
-      <div class="day-card" data-day="Tue">
-        <div class="day-header">
-          <span class="day-name">Вівторок</span>
-          <span class="day-badge">ВТ</span>
-        </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Tue')"><span>+</span> Додати урок</button>
-      </div>
+        <div id="calendar-days" class="days-grid"></div>
+      </section>
 
-      <div class="day-card" data-day="Wed">
-        <div class="day-header">
-          <span class="day-name">Середа</span>
-          <span class="day-badge">СР</span>
+      <!-- Панель деталей обраного дня -->
+      <section class="day-details-card">
+        <div class="details-header">
+          <h2 id="selected-date-title">Обери день</h2>
+          <span id="tomorrow-badge" class="badge hidden">Завтра!</span>
         </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Wed')"><span>+</span> Додати урок</button>
-      </div>
 
-      <div class="day-card" data-day="Thu">
-        <div class="day-header">
-          <span class="day-name">Четвер</span>
-          <span class="day-badge">ЧТ</span>
+        <div id="tasks-list" class="tasks-list">
+          <p class="empty-state">Обери день у календарі, щоб переглянути або додати завдання.</p>
         </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Thu')"><span>+</span> Додати урок</button>
-      </div>
 
-      <div class="day-card" data-day="Fri">
-        <div class="day-header">
-          <span class="day-name">П'ятниця</span>
-          <span class="day-badge">ПТ</span>
-        </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Fri')"><span>+</span> Додати урок</button>
-      </div>
-
-      <div class="day-card weekend" data-day="Sat">
-        <div class="day-header">
-          <span class="day-name">Субота</span>
-          <span class="day-badge">СБ</span>
-        </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Sat')"><span>+</span> Додати урок</button>
-      </div>
-
-      <div class="day-card weekend" data-day="Sun">
-        <div class="day-header">
-          <span class="day-name">Неділя</span>
-          <span class="day-badge">НД</span>
-        </div>
-        <div class="schedule"></div>
-        <button class="add-btn" onclick="addLesson('Sun')"><span>+</span> Додати урок</button>
-      </div>
+        <button id="add-task-btn" class="glow-btn hidden" onclick="addNewTaskInput()">
+          <span>+</span> Додати предмет
+        </button>
+      </section>
     </main>
   </div>
 
