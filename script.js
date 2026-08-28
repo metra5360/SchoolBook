@@ -18,7 +18,6 @@ function renderCalendar() {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   
-  // Пн = 0, Нд = 6
   let startingDay = firstDay.getDay() - 1;
   if (startingDay === -1) startingDay = 6;
 
@@ -28,7 +27,6 @@ function renderCalendar() {
   const daysContainer = document.getElementById('calendar-days');
   daysContainer.innerHTML = '';
 
-  // Дні попереднього місяця
   for (let i = startingDay - 1; i >= 0; i--) {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day-cell other-month';
@@ -36,7 +34,6 @@ function renderCalendar() {
     daysContainer.appendChild(dayDiv);
   }
 
-  // Дні поточного місяця
   const tomorrowStr = getTomorrowDateString();
 
   for (let day = 1; day <= totalDays; day++) {
@@ -111,13 +108,16 @@ function addNewTaskInput() {
   if (!tasksData[selectedDateStr]) tasksData[selectedDateStr] = [];
 
   tasksData[selectedDateStr].push({ subject: '', text: '' });
-  saveAndRefresh();
+  saveData();
+  renderTasks();
+  renderCalendar();
 }
 
 function updateTask(index, field, value) {
   if (tasksData[selectedDateStr] && tasksData[selectedDateStr][index]) {
     tasksData[selectedDateStr][index][field] = value;
-    saveAndRefresh();
+    // Зберігаємо дані в пам'ять без виклику renderTasks(), щоб поле вводу не закривалось
+    saveData();
   }
 }
 
@@ -126,13 +126,13 @@ function removeTask(index) {
   if (tasksData[selectedDateStr].length === 0) {
     delete tasksData[selectedDateStr];
   }
-  saveAndRefresh();
-}
-
-function saveAndRefresh() {
-  localStorage.setItem('calendar_tasks_v3', JSON.stringify(tasksData));
+  saveData();
   renderTasks();
   renderCalendar();
+}
+
+function saveData() {
+  localStorage.setItem('calendar_tasks_v3', JSON.stringify(tasksData));
   checkTomorrowTasks();
 }
 
