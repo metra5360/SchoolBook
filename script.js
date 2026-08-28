@@ -1,12 +1,10 @@
 const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-// Завантаження даних при відкритті
 document.addEventListener('DOMContentLoaded', () => {
   loadDiary();
   checkTomorrowTasks();
 });
 
-// Додавання нового блоку уроку
 function addLesson(day, name = '', task = '') {
   const container = document.querySelector(`.day-card[data-day="${day}"] .schedule`);
   
@@ -14,8 +12,8 @@ function addLesson(day, name = '', task = '') {
   lessonDiv.className = 'lesson-item';
   
   lessonDiv.innerHTML = `
-    <input type="text" placeholder="Назва уроку" value="${name}" oninput="saveDiary()">
-    <textarea placeholder="Завдання / Нагадування" oninput="saveDiary()">${task}</textarea>
+    <input type="text" placeholder="Назва уроку..." value="${name}" oninput="saveDiary()">
+    <textarea placeholder="Домашнє завдання..." oninput="saveDiary()">${task}</textarea>
     <button class="delete-btn" onclick="removeLesson(this)">Видалити</button>
   `;
   
@@ -23,13 +21,11 @@ function addLesson(day, name = '', task = '') {
   saveDiary();
 }
 
-// Видалення уроку
 function removeLesson(button) {
   button.parentElement.remove();
   saveDiary();
 }
 
-// Автозбереження у localStorage
 function saveDiary() {
   const diaryData = {};
   
@@ -45,13 +41,12 @@ function saveDiary() {
     });
   });
   
-  localStorage.setItem('myDiaryData', JSON.stringify(diaryData));
+  localStorage.setItem('myDiaryData_v2', JSON.stringify(diaryData));
   checkTomorrowTasks();
 }
 
-// Завантаження збережених даних
 function loadDiary() {
-  const saved = localStorage.getItem('myDiaryData');
+  const saved = localStorage.getItem('myDiaryData_v2');
   if (!saved) return;
   
   const diaryData = JSON.parse(saved);
@@ -63,19 +58,17 @@ function loadDiary() {
   }
 }
 
-// Перевірка нагадувань на завтра
 function checkTomorrowTasks() {
   const todayIndex = new Date().getDay();
   const tomorrowIndex = (todayIndex + 1) % 7;
   const tomorrowKey = daysMap[tomorrowIndex];
   
-  const saved = localStorage.getItem('myDiaryData');
+  const saved = localStorage.getItem('myDiaryData_v2');
   if (!saved) return;
   
   const diaryData = JSON.parse(saved);
   const tomorrowLessons = diaryData[tomorrowKey] || [];
   
-  // Шукаємо уроки, де є заповнене завдання
   const tasksToDisplay = tomorrowLessons.filter(l => l.task.trim() !== '');
   
   const banner = document.getElementById('notification-banner');
@@ -84,11 +77,10 @@ function checkTomorrowTasks() {
   if (tasksToDisplay.length > 0) {
     document.body.classList.add('alert-mode');
     
-    const lessonList = tasksToDisplay.map(l => l.name ? `"${l.name}"` : 'Урок без назви').join(', ');
-    bannerText.textContent = `Увага! На завтра є завдання з таких предметів: ${lessonList}`;
+    const lessonList = tasksToDisplay.map(l => l.name ? `"${l.name}"` : 'Урок').join(', ');
+    bannerText.textContent = `Завдання на завтра з предметів: ${lessonList}`;
     banner.classList.remove('hidden');
     
-    // Підсвічуємо картку завтрашнього дня
     document.querySelectorAll('.day-card').forEach(card => {
       if (card.dataset.day === tomorrowKey) {
         card.classList.add('tomorrow-highlight');
