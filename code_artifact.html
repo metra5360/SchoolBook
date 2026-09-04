@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Домашній Планувальник</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Мій Планувальник ДЗ</h1>
+                    <p class="text-xs text-slate-500">Організуй своє навчання легко</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="openModal()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Додати завдання
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Calendar Section -->
+        <section class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="currentMonthYear" class="text-lg font-bold text-slate-800">Місяць Рік</h2>
+                <div class="flex gap-1">
+                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button onclick="goToToday()" class="px-3 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition cursor-pointer">Сьогодні</button>
+                    <button onclick="changeMonth(1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Days of Week Header -->
+            <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs text-slate-400 mb-2">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Нд</div>
+            </div>
+
+            <!-- Calendar Days Grid -->
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1 flex-1 auto-rows-fr min-h-[360px]">
+                <!-- Populated dynamically via JavaScript -->
+            </div>
+        </section>
+
+        <!-- Tasks List Section -->
+        <section class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800" id="selectedDateTitle">Завдання</h2>
+                    <p class="text-xs text-slate-500" id="selectedDateSubtitle">Оберіть дату в календарі</p>
+                </div>
+                <span id="taskCountBadge" class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">0 завдань</span>
+            </div>
+
+            <div id="taskList" class="flex-1 overflow-y-auto space-y-3 max-h-[450px] pr-1">
+                <!-- Tasks will be injected here -->
+                <div class="text-center py-12 text-slate-400">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <p class="text-sm">На цю дату немає завдань</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="taskModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-100 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900" id="modalTitle">Нове домашнє завдання</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <form id="taskForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="taskId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Предмет</label>
+                    <input type="text" id="subjectInput" required placeholder="Наприклад: Математика" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Дата виконання</label>
+                    <input type="date" id="dateInput" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Опис домашнього завдання</label>
+                    <textarea id="descInput" rows="3" required placeholder="Що задано зробити..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"></textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <input type="checkbox" id="completedInput" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <label for="completedInput" class="text-sm font-medium text-slate-700">Виконано</label>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition cursor-pointer text-sm">Скасувати</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition cursor-pointer text-sm shadow-sm">Зберегти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="messageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center border border-slate-100">
+            <h3 id="messageTitle" class="text-lg font-bold text-slate-900 mb-2">Повідомлення</h3>
+            <p id="messageText" class="text-sm text-slate-600 mb-6">Текст повідомлення...</p>
+            <button onclick="closeMessageModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition cursor-pointer text-sm">Зрозуміло</button>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let tasks = [];
+        let currentDate = new Date();
+        let selectedDateStr = formatDateKey(new Date());
+
+        const monthsNames = [
+            "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+            "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+        ];
+
+        // Local Storage System
+        function loadTasks() {
+            const saved = localStorage.getItem('homework_tasks');
+            if (saved) {
+                try {
+                    tasks = JSON.parse(saved);
+                } catch (e) {
+                    tasks = [];
+                }
+            } else {
+                // Sample initial data
+                const todayStr = formatDateKey(new Date());
+                tasks = [
+                    {
+                        id: 'sample-1',
+                        subject: 'Математика',
+                        date: todayStr,
+                        description: 'Розв’язати номери 412 та 415 з підручника алгебри.',
+                        completed: false
+                    },
+                    {
+                        id: 'sample-2',
+                        subject: 'Історія України',
+                        date: todayStr,
+                        description: 'Прочитати параграф 18 та підготувати конспект.',
+                        completed: true
+                    }
+                ];
+                saveTasks();
+            }
+        }
+
+        function saveTasks() {
+            localStorage.setItem('homework_tasks', JSON.stringify(tasks));
+        }
+
+        function showMessage(title, text) {
+            document.getElementById('messageTitle').innerText = title;
+            document.getElementById('messageText').innerText = text;
+            document.getElementById('messageModal').classList.remove('hidden');
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.add('hidden');
+        }
+
+        // Date formatting helper YYYY-MM-DD
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Calendar Navigation
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            selectedDateStr = formatDateKey(currentDate);
+            renderCalendar();
+            renderTasksForSelectedDate();
+        }
+
+        // Render Calendar Grid
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            document.getElementById('currentMonthYear').innerText = `${monthsNames[month]} ${year}`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // First day of the month
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            // Adjust so week starts on Monday (0 = Mon, 6 = Sun)
+            const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+
+            // Total days in current month
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            // Total days in previous month
+            const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+            const todayStr = formatDateKey(new Date());
+
+            // Previous month tail days
+            for (let i = adjustedFirstDay - 1; i >= 0; i--) {
+                const dayNum = prevMonthTotalDays - i;
+                const cell = document.createElement('div');
+                cell.className = "bg-slate-50/50 rounded-xl p-2 text-slate-300 text-xs flex flex-col justify-between select-none cursor-default";
+                cell.innerHTML = `<span class="font-medium">${dayNum}</span>`;
+                grid.appendChild(cell);
+            }
+
+            // Current month days
+            for (let day = 1; day <= totalDays; day++) {
+                const dateObj = new Date(year, month, day);
+                const dateStr = formatDateKey(dateObj);
+
+                const cell = document.createElement('div');
+                let cellClasses = "bg-white border border-slate-100 rounded-xl p-2 flex flex-col justify-between transition cursor-pointer hover:border-indigo-300";
+
+                if (dateStr === todayStr) {
+                    cellClasses += " ring-2 ring-indigo-500/30 font-semibold";
+                }
+                if (dateStr === selectedDateStr) {
+                    cellClasses += " bg-indigo-50/60 border-indigo-500";
+                }
+
+                cell.className = cellClasses;
+                cell.onclick = () => {
+                    selectedDateStr = dateStr;
+                    renderCalendar();
+                    renderTasksForSelectedDate();
+                };
+
+                // Check tasks for this date
+                const dayTasks = tasks.filter(t => t.date === dateStr);
+                const completedCount = dayTasks.filter(t => t.completed).length;
+
+                let indicatorHTML = '';
+                if (dayTasks.length > 0) {
+                    const badgeColor = (completedCount === dayTasks.length) ? 'bg-emerald-500' : 'bg-indigo-600';
+                    indicatorHTML = `<div class="flex items-center gap-1 mt-1"><span class="w-2 h-2 rounded-full ${badgeColor}"></span><span class="text-[10px] text-slate-500 font-medium">${completedCount}/${dayTasks.length}</span></div>`;
+                }
+
+                cell.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs ${dateStr === todayStr ? 'bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold' : 'text-slate-700 font-medium'}">${day}</span>
+                    </div>
+                    ${indicatorHTML}
+                `;
+                grid.appendChild(cell);
+            }
+
+            // Next month leading days to complete the grid layout (up to 42 cells)
+            const totalCellsSoFar = adjustedFirstDay + totalDays;
+            const remainingCells = totalCellsSoFar <= 35 ? (35 - totalCellsSoFar) : (42 - totalCellsSoFar);
+
+            for (let day = 1; day <= remainingCells; day++) {
+                const cell = document.createElement('div');
+                cell.className = "bg-slate-50/50 rounded-xl p-2 text-slate-300 text-xs flex flex-col justify-between select-none cursor-default";
+                cell.innerHTML = `<span class="font-medium">${day}</span>`;
+                grid.appendChild(cell);
+            }
+
+            renderTasksForSelectedDate();
+        }
+
+        // Render Tasks for Selected Date
+        function renderTasksForSelectedDate() {
+            const taskListEl = document.getElementById('taskList');
+            const dateTitleEl = document.getElementById('selectedDateTitle');
+            const dateSubtitleEl = document.getElementById('selectedDateSubtitle');
+            const taskCountBadge = document.getElementById('taskCountBadge');
+
+            // Format title date nicely in Ukrainian
+            const [year, month, day] = selectedDateStr.split('-');
+            const dateObj = new Date(year, month - 1, day);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            dateTitleEl.innerText = dateObj.toLocaleDateString('uk-UA', options);
+            dateSubtitleEl.innerText = `Завдання на цей день`;
+
+            const dayTasks = tasks.filter(t => t.date === selectedDateStr);
+            taskCountBadge.innerText = `${dayTasks.length} завд.`;
+
+            if (dayTasks.length === 0) {
+                taskListEl.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <p class="text-sm">На цю дату немає завдань</p>
+                    </div>
+                `;
+                return;
+            }
+
+            taskListEl.innerHTML = '';
+            dayTasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `p-4 rounded-xl border transition flex items-start justify-between gap-3 ${task.completed ? 'bg-slate-50 border-slate-200 opacity-75' : 'bg-white border-slate-200 shadow-xs'}`;
+                
+                taskCard.innerHTML = `
+                    <div class="flex items-start gap-3 flex-1">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTaskStatus('${task.id}')" class="mt-1 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold text-slate-900 ${task.completed ? 'line-through text-slate-500' : ''}">${escapeHtml(task.subject)}</h4>
+                            <p class="text-xs text-slate-600 mt-1 whitespace-pre-wrap ${task.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(task.description)}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="editTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition cursor-pointer" title="Редагувати">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button onclick="deleteTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition cursor-pointer" title="Видалити">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+                taskListEl.appendChild(taskCard);
+            });
+        }
+
+        // Modal Controls
+        function openModal(taskIdToEdit = null) {
+            const modal = document.getElementById('taskModal');
+            const form = document.getElementById('taskForm');
+            form.reset();
+            document.getElementById('taskId').value = '';
+            document.getElementById('modalTitle').innerText = 'Нове домашнє завдання';
+            document.getElementById('dateInput').value = selectedDateStr;
+
+            if (taskIdToEdit) {
+                const task = tasks.find(t => t.id === taskIdToEdit);
+                if (task) {
+                    document.getElementById('modalTitle').innerText = 'Редагувати завдання';
+                    document.getElementById('taskId').value = task.id;
+                    document.getElementById('subjectInput').value = task.subject;
+                    document.getElementById('dateInput').value = task.date;
+                    document.getElementById('descInput').value = task.description;
+                    document.getElementById('completedInput').checked = task.completed;
+                }
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+
+        // Handle Form Submission
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('taskId').value;
+            const subject = document.getElementById('subjectInput').value.trim();
+            const date = document.getElementById('dateInput').value;
+            const description = document.getElementById('descInput').value.trim();
+            const completed = document.getElementById('completedInput').checked;
+
+            if (!subject || !date || !description) {
+                showMessage('Помилка', 'Будь ласка, заповніть всі поля.');
+                return;
+            }
+
+            if (id) {
+                // Edit existing
+                const index = tasks.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    tasks[index] = { id, subject, date, description, completed };
+                }
+            } else {
+                // Create new
+                const newTask = {
+                    id: 'task-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9),
+                    subject,
+                    date,
+                    description,
+                    completed
+                };
+                tasks.push(newTask);
+            }
+
+            saveTasks();
+            closeModal();
+
+            // Switch selected date to the task's date so user sees it immediately
+            selectedDateStr = date;
+            const taskDateObj = new Date(date);
+            currentDate = new Date(taskDateObj.getFullYear(), taskDateObj.getMonth(), 1);
+
+            renderCalendar();
+        }
+
+        function toggleTaskStatus(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+                renderCalendar();
+            }
+        }
+
+        function editTask(id) {
+            openModal(id);
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderCalendar();
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize application on window load
+        window.onload = function() {
+            loadTasks();
+            renderCalendar();
+        };
+    </script>
+</body>
+</html>
